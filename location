@@ -1,0 +1,51 @@
+import cv2
+import numpy as np
+import sqlite3
+from datetime import datetime
+
+# Load a pre-trained model for facial expression recognition (example: a simple classifier)
+# For real application, consider using more advanced models or libraries
+
+# Initialize webcam
+cap = cv2.VideoCapture(0)
+
+def log_data(mood, behavior, medicine_taken):
+    conn = sqlite3.connect('alzheimer_monitor.db')
+    cursor = conn.cursor()
+    cursor.execute('''CREATE TABLE IF NOT EXISTS logs
+                      (timestamp DATETIME, mood TEXT, behavior TEXT, medicine_taken BOOLEAN)''')
+    cursor.execute('INSERT INTO logs (timestamp, mood, behavior, medicine_taken) VALUES (?, ?, ?, ?)',
+                   (datetime.now(), mood, behavior, medicine_taken))
+    conn.commit()
+    conn.close()
+
+def analyze_expression(frame):
+    # Dummy function for demonstration
+    # Replace with actual mood/behavior analysis
+    # For example, use a trained machine learning model
+    return "happy"  # This should be based on actual analysis
+
+def main():
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Process frame to analyze mood/behavior
+        mood = analyze_expression(frame)
+        behavior = "normal"  # Placeholder: analyze behavior from frame or other sources
+        medicine_taken = input("Medicine taken (yes/no): ").lower() == 'yes'
+
+        # Log the data
+        log_data(mood, behavior, medicine_taken)
+
+        # Display the webcam feed
+        cv2.imshow('Webcam Feed', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
+
+if _name_ == '_main_':
+    main()
